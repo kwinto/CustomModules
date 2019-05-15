@@ -16,65 +16,44 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
     if (!args.secret || !args.secret.server) return Promise.reject("Secret not defined or invalid.");
     if (!args.robot) return Promise.reject("No robot name defined.");
 
-    const body = {
-        userId: input.user.userId,
-        text: "hi",
-        data: {},
-        sessionId: input.user.sessionId,
-        URLToken: "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5"
-    };
-
     return new Promise( (resolve, reject) => {
 
-        axios.post('https://api-internal.cognigy.ai/endpoint/inject', body, {
+        const data = {
+            "parameters":
+                [
+                    {
+                        "variableName": args.variableName,
+                        "attribute": [
+                            {
+                                "type": "text",
+                                "name": args.variableName,
+                                "value": args.value
+                            }
+                        ]
+                    }
+                ]
+        };
+
+        let robotRes;
+
+        axios.post(`${args.secret.server}/rest/run/${args.project}/${args.robot}.robot`, data, {
             headers: {
-                "X-API-Key": "2b488aa4d112c554159de1b03ebf0040",
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            },
-        }).then((res) => {
-            input.actions.output("RESPONSE", null);
-            input.actions.log("error", JSON.stringify(res));
+            }
+        }).then((robotResponse) => {
+            robotRes = robotResponse;
+            sendInject(args.secret.api_key, input.input.userId, "hi", input.input.sessionId, "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5", input);
+        }).then(() => {
+            input.context.getFullContext()[args.store] = robotRes.data.values;
             resolve(input);
-        }).catch((err) => {
-            input.actions.output("ERROOOR", null);
-            input.actions.log("error", JSON.stringify(err));
+        })
+        .catch((error) => {
+            if (args.stopOnError) {
+                reject(error.message); return;
+            } else input.context.getFullContext()[args.store] = { "error": error.message };
             resolve(input);
         });
-
-        // sendInject(args.secret.api_key, input.user.userId, "hi", input.user.sessionId, "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5", input);
-
-        // const data = {
-        //     "parameters":
-        //         [
-        //             {
-        //                 "variableName": args.variableName,
-        //                 "attribute": [
-        //                     {
-        //                         "type": "text",
-        //                         "name": args.variableName,
-        //                         "value": args.value
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        // };
-
-        // axios.post(`${args.secret.server}/rest/run/${args.project}/${args.robot}.robot`, data, {
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json'
-        //     }
-        // }).then((response) => {
-        //     sendInject(args.secret.api_key, input.user.userId, "hi", input.user.sessionId, "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5");
-        //     input.context.getFullContext()[args.store] = response.data.values;
-        //     resolve(input);
-        // }).catch((error) => {
-        //     if (args.stopOnError) {
-        //         reject(error.message); return;
-        //     } else input.context.getFullContext()[args.store] = { "error": error.message };
-        //     resolve(input);
-        // });
 
     });
 }
@@ -82,6 +61,7 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
 module.exports.RunRobot = RunRobot;
 
 const sendInject = (api_key, userId, text, sessionId, URLToken, input) => {
+    input.actions.output("started inject", null);
 
     const body = {
         userId,
@@ -91,7 +71,8 @@ const sendInject = (api_key, userId, text, sessionId, URLToken, input) => {
         URLToken
     };
 
-    return axios.post('https://api-internal.cognigy.ai/inject', body, {
+
+    return axios.post('https://api-internal.cognigy.ai/endpoint/inject', body, {
         headers: {
             "X-API-Key": api_key,
             'Accept': 'application/json',
@@ -99,8 +80,10 @@ const sendInject = (api_key, userId, text, sessionId, URLToken, input) => {
         },
     }).then((res) => {
         input.actions.log("error", JSON.stringify(res));
+        input.actions.output("The inject was sent successfully", null);
     }).catch((err) => {
         input.actions.log("error", JSON.stringify(err));
+        input.actions.output("There was an error", err);
         return;
     });
 };
