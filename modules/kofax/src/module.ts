@@ -43,7 +43,7 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
             }
         }).then((robotResponse) => {
             robotRes = robotResponse;
-            sendInject(args.secret.api_key, input.input.userId, "hi", input.input.sessionId, "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5", input);
+            return sendInject(args.secret.api_key, input.input.userId, "hi", input.input.sessionId, "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5", input);
         }).then(() => {
             input.context.getFullContext()[args.store] = robotRes.data.values;
             resolve(input);
