@@ -7,16 +7,21 @@ import axios from 'axios';
  * @arg {CognigyScript} `project` The name of the project where the robot is located
  * @arg {CognigyScript} `variableName` The name of the variable the robot uses
  * @arg {CognigyScript} `value` The value of the variable the robot uses, e.g. "input text"
+ * @arg {CognigyScript} `injectText` The text the bot should send to the Flow when the robot is finished"
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  * @arg {CognigyScript} `store` Where to store the result
  */
-async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot: string, project: string, variableName: string, value: string, stopOnError: boolean, store: string }): Promise<IFlowInput | {}> {
+async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot: string, project: string, variableName: string, value: string, injectText: string, stopOnError: boolean, store: string }): Promise<IFlowInput | {}> {
 
     // Check if secret exists and contains correct parameters
-    if (!args.secret || !args.secret.server) return Promise.reject("Secret not defined or invalid.");
+    if (!args.secret || !args.secret.server || !args.secret.api_key) return Promise.reject("Secret not defined or invalid.");
     if (!args.robot) return Promise.reject("No robot name defined.");
+    if (!args.injectText) return Promise.reject("No inject Text defined.");
+    if (!args.project) return Promise.reject("No project defined.");
+    if (!args.variableName) return Promise.reject("No variable defined.");
+    if (!args.value) return Promise.reject("No input value for robot defined.");
 
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
         const data = {
             "parameters":
@@ -43,12 +48,11 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
             }
         }).then((robotResponse) => {
             robotRes = robotResponse;
-            return sendInject(args.secret.api_key, input.input.userId, "hi", input.input.sessionId, "5fc6cecf484aae8556645b21864ebf3f4cb8926534bed17e6aecfbb9c83ab7a5", input);
+            return sendInject(args.secret.api_key, input.input.userId, args.injectText, input.input.sessionId, (input.input as any).URLToken, input);
         }).then(() => {
             input.context.getFullContext()[args.store] = robotRes.data.values;
             resolve(input);
-        })
-        .catch((error) => {
+        }).catch((error) => {
             if (args.stopOnError) {
                 reject(error.message); return;
             } else input.context.getFullContext()[args.store] = { "error": error.message };
@@ -61,7 +65,6 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
 module.exports.RunRobot = RunRobot;
 
 const sendInject = (api_key, userId, text, sessionId, URLToken, input) => {
-    input.actions.output("started inject", null);
 
     const body = {
         userId,
@@ -71,7 +74,6 @@ const sendInject = (api_key, userId, text, sessionId, URLToken, input) => {
         URLToken
     };
 
-
     return axios.post('https://api-internal.cognigy.ai/endpoint/inject', body, {
         headers: {
             "X-API-Key": api_key,
@@ -79,11 +81,9 @@ const sendInject = (api_key, userId, text, sessionId, URLToken, input) => {
             'Content-Type': 'application/json'
         },
     }).then((res) => {
-        input.actions.log("error", JSON.stringify(res));
-        input.actions.output("The inject was sent successfully", null);
+        // input.actions.log("info", JSON.stringify(res));
     }).catch((err) => {
-        input.actions.log("error", JSON.stringify(err));
-        input.actions.output("There was an error", err);
+        // input.actions.log("error", JSON.stringify(err));
         return;
     });
 };
