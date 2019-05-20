@@ -15,18 +15,16 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
     if (!args.body) return Promise.reject("No JSON body defined.");
     if (!args.project) return Promise.reject("No project defined.");
 
-    axios.post(`${args.secret.server}/rest/run/${args.project}/${args.robot}.robot`, args.body, {
+    axios.post(`https://request-forwarder.cognigy.ai/forward`, args.body, {
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-API-Key': args.secret.api_key
         }
     }).catch((err) => {
         input.actions.log("error", err);
         return input;
     });
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return input;
 }
 
 module.exports.RunRobot = RunRobot;
