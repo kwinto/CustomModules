@@ -23,11 +23,11 @@ async function listAutomations(input: any, args: { secret: CognigySecret, store:
       const payload = {
         username,
         password
-      }
+      };
 
       // input.actions.output(JSON.stringify(payload));
 
-      //Get token
+      // Get token
       axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload)
       .then((authenticationResponse) => {
         // input.actions.output('auth')
@@ -37,7 +37,7 @@ async function listAutomations(input: any, args: { secret: CognigySecret, store:
           headers: {
             'X-Authorization': token
           }
-        }
+        };
 
         // input.actions.output(JSON.stringify(options));
 
@@ -55,6 +55,6 @@ async function listAutomations(input: any, args: { secret: CognigySecret, store:
         resolve(input);
       })
     );
-  }) 
+  });
 }
 module.exports.listAutomations = listAutomations;
