@@ -14,7 +14,7 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
-    const response = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/repository/file/list', {}, options);
+    const response = await axios.post(`${url}/v2/repository/file/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
   } catch (error) {
@@ -43,7 +43,7 @@ async function listBotExecutions(input: any, args: { secret: CognigySecret, cont
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
-    const response = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/activity/list', {}, options);
+    const response = await axios.post(`${url}/v2/activity/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
   } catch (error) {
@@ -72,7 +72,7 @@ async function listDevices(input: any, args: { secret: CognigySecret, contextSto
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
-    const response = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/devices/list', {}, options);
+    const response = await axios.post(`${url}/v2/devices/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
   } catch (error) {
