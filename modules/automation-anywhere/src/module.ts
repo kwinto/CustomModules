@@ -62,7 +62,6 @@ module.exports.listActivities = listActivities;
 async function authenticate(input: any, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<object> {
 
   let options = {};
-
   const payload = {
     username,
     password
