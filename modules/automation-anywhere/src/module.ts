@@ -59,6 +59,35 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
 module.exports.listActivities = listActivities;
 
 
+/**
+ * Lists all devices
+ * @arg {SecretSelect} `secret` The configured secret to use
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+
+async function listDevices(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+
+  const { contextStore, stopOnError, username, password, url } = validateArgs(args);
+
+  try {
+    const options = await authenticate(input, username, password, contextStore, stopOnError);
+    const response = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/devices/list', {}, options);
+
+    input.actions.addToContext(contextStore, response.data, 'simple');
+  } catch (error) {
+    if (stopOnError) {
+      throw new Error(error.message);
+    } else {
+      input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+    }
+  }
+
+  return input;
+}
+module.exports.listDevices = listDevices;
+
+
 async function authenticate(input: any, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<object> {
 
   let options = {};
