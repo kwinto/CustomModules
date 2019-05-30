@@ -10,17 +10,7 @@ import axios from 'axios';
 
 async function listAutomations(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
-  /* validate node arguments */
-  const { secret, contextStore, stopOnError } = args;
-  if (!secret) throw new Error("Secret not defined.");
-  if (!contextStore) throw new Error("Context store not defined.");
-  if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
-
-  /* validate secrets */
-  const { username, url, password } = secret;
-  if (!username) throw new Error("Secret is missing the 'username' field.");
-  if (!url) throw new Error("Secret is missing the 'username' url.");
-  if (!password) throw new Error("Secret is missing the 'password' field.");
+  const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
@@ -49,17 +39,7 @@ module.exports.listAutomations = listAutomations;
 
 async function listActivities(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
-  /* validate node arguments */
-  const { secret, contextStore, stopOnError } = args;
-  if (!secret) throw new Error("Secret not defined.");
-  if (!contextStore) throw new Error("Context store not defined.");
-  if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
-
-  /* validate secrets */
-  const { username, url, password } = secret;
-  if (!username) throw new Error("Secret is missing the 'username' field.");
-  if (!url) throw new Error("Secret is missing the 'username' url.");
-  if (!password) throw new Error("Secret is missing the 'password' field.");
+  const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
@@ -107,4 +87,35 @@ async function authenticate(input: any, username: string, password: string, cont
   }
 
   return options;
+}
+
+interface IValidateArgsResponse {
+  contextStore: string;
+  stopOnError: boolean;
+  username: string;
+  password: string;
+  url: string;
+}
+
+function validateArgs(args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): IValidateArgsResponse {
+
+  /* validate node arguments */
+  const { secret, contextStore, stopOnError } = args;
+  if (!secret) throw new Error("Secret not defined.");
+  if (!contextStore) throw new Error("Context store not defined.");
+  if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+  /* validate secrets */
+  const { username, url, password } = secret;
+  if (!username) throw new Error("Secret is missing the 'username' field.");
+  if (!url) throw new Error("Secret is missing the 'username' url.");
+  if (!password) throw new Error("Secret is missing the 'password' field.");
+
+  return {
+    contextStore,
+    stopOnError,
+    username,
+    password,
+    url
+  };
 }
