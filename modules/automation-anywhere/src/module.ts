@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 /**
- * Creates a Ticket in Jira
+ * Lists all automations
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `summary` The summary of the new ticket
  * @arg {CognigyScript} `store` Where to store the result
