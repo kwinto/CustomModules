@@ -31,13 +31,13 @@ module.exports.listAutomations = listAutomations;
 
 
 /**
- * Lists all acitivies
+ * Lists all acitivies / bot executions
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
 
-async function listActivities(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function listBotExecutions(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
@@ -56,7 +56,7 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
 
   return input;
 }
-module.exports.listActivities = listActivities;
+module.exports.listBotExecutions = listBotExecutions;
 
 
 /**
