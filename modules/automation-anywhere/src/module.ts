@@ -23,13 +23,7 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
   if (!password) throw new Error("Secret is missing the 'password' field.");
 
   try {
-    const token = await authenticate(input, username, password, contextStore, stopOnError);
-    const options = {
-      headers: {
-        'X-Authorization': token
-      }
-    };
-
+    const options = await authenticate(input, username, password, contextStore, stopOnError);
     const fileListResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/repository/file/list', {}, options);
 
     input.actions.addToContext(contextStore, fileListResponse.data, 'simple');
@@ -68,13 +62,7 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
   if (!password) throw new Error("Secret is missing the 'password' field.");
 
   try {
-    const token = await authenticate(input, username, password, contextStore, stopOnError);
-    const options = {
-      headers: {
-        'X-Authorization': token
-      }
-    };
-
+    const options = await authenticate(input, username, password, contextStore, stopOnError);
     const fileListResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/activity/list', {}, options);
 
     input.actions.addToContext(contextStore, fileListResponse.data, 'simple');
@@ -91,9 +79,9 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
 module.exports.listActivities = listActivities;
 
 
-async function authenticate(input: any, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<string> {
+async function authenticate(input: any, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<object> {
 
-  let token = "";
+  let options = {};
 
   const payload = {
     username,
@@ -102,8 +90,14 @@ async function authenticate(input: any, username: string, password: string, cont
 
   try {
     const authenticationResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload);
+    const token = authenticationResponse.data.token;
 
-    token = authenticationResponse.data.token;
+    options = {
+      headers: {
+        'X-Authorization': token
+      }
+    };
+
   } catch (error) {
     if (stopOnError) {
       throw new Error(error.message);
@@ -112,5 +106,5 @@ async function authenticate(input: any, username: string, password: string, cont
     }
   }
 
-  return token;
+  return options;
 }
