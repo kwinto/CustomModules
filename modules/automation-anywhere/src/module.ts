@@ -4,12 +4,11 @@ import axios from 'axios';
 /**
  * Lists all automations
  * @arg {SecretSelect} `secret` The configured secret to use
- * @arg {CognigyScript} `summary` The summary of the new ticket
- * @arg {CognigyScript} `store` Where to store the result
+ * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
 
-async function listAutomations(input: any, args: { secret: CognigySecret, store: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function listAutomations(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
   if (!args.secret || !args.secret.username || !args.secret.password || !args.secret.url) return Promise.reject("Secret not defined or invalid.");
   // if (!args.summary) return Promise.reject("No ticket sumnmary defined");
@@ -46,12 +45,12 @@ async function listAutomations(input: any, args: { secret: CognigySecret, store:
       .then((fileListResponse) => {
         // input.actions.output('filelist')
 
-        input.context.getFullContext()[args.store] = fileListResponse.data;
+        input.context.getFullContext()[args.contextStore] = fileListResponse.data;
 
         resolve(input);
       })
       .catch(((error) => {
-        input.context.getFullContext()[args.store] = { "error": error.message };
+        input.context.getFullContext()[args.contextStore] = { "error": error.message };
         resolve(input);
       })
     );
