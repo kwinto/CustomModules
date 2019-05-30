@@ -10,8 +10,18 @@ import axios from 'axios';
 
 async function listAutomations(input: any, args: { secret: CognigySecret, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
-  if (!args.secret || !args.secret.username || !args.secret.password || !args.secret.url) return Promise.reject("Secret not defined or invalid.");
-  // if (!args.summary) return Promise.reject("No ticket sumnmary defined");
+  /* validate node arguments */
+  const { secret, contextStore, stopOnError } = args;
+  if (!secret) throw new Error("Secret not defined.");
+  if (!contextStore) throw new Error("Context store not defined.");
+  if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+  /* validate secrets */
+  const { username, url, password } = secret;
+  if (!username) throw new Error("Secret is missing the 'username' field.");
+  if (!url) throw new Error("Secret is missing the 'username' url.");
+  if (!password) throw new Error("Secret is missing the 'password' field.");
+
 
   return new Promise((resolve, reject) => {
 
