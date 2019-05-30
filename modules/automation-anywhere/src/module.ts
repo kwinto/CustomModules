@@ -22,48 +22,32 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
   if (!url) throw new Error("Secret is missing the 'username' url.");
   if (!password) throw new Error("Secret is missing the 'password' field.");
 
+  const payload = {
+    username,
+    password
+  };
 
-  return new Promise((resolve, reject) => {
+  try {
+    const authenticationResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload);
 
-    const username = args.secret.username;
-    const password = args.secret.password;
-    const url = args.secret.url;
-
-    const payload = {
-      username,
-      password
+    const token = authenticationResponse.data.token;
+    const options = {
+      headers: {
+        'X-Authorization': token
+      }
     };
 
-    // input.actions.output(JSON.stringify(payload));
+    const fileListResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/repository/file/list', {}, options);
 
-    // Get token
-    axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload)
-      .then((authenticationResponse) => {
-        // input.actions.output('auth')
-        const token = authenticationResponse.data.token;
+    input.actions.addToContext(contextStore, fileListResponse.data, 'simple');
+  } catch (error) {
+    if (stopOnError) {
+      throw new Error(error.message);
+    } else {
+      input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+    }
+  }
 
-        const options = {
-          headers: {
-            'X-Authorization': token
-          }
-        };
-
-        // input.actions.output(JSON.stringify(options));
-
-        return axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/repository/file/list', {}, options);
-      })
-      .then((fileListResponse) => {
-        // input.actions.output('filelist')
-
-        input.context.getFullContext()[args.contextStore] = fileListResponse.data;
-
-        resolve(input);
-      })
-      .catch(((error) => {
-        input.context.getFullContext()[args.contextStore] = { "error": error.message };
-        resolve(input);
-      })
-      );
-  });
+  return input;
 }
 module.exports.listAutomations = listAutomations;
