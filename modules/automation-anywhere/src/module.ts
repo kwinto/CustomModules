@@ -15,19 +15,19 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
 
   return new Promise((resolve, reject) => {
 
-      const username = args.secret.username;
-      const password = args.secret.password;
-      const url = args.secret.url;
+    const username = args.secret.username;
+    const password = args.secret.password;
+    const url = args.secret.url;
 
-      const payload = {
-        username,
-        password
-      };
+    const payload = {
+      username,
+      password
+    };
 
-      // input.actions.output(JSON.stringify(payload));
+    // input.actions.output(JSON.stringify(payload));
 
-      // Get token
-      axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload)
+    // Get token
+    axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload)
       .then((authenticationResponse) => {
         // input.actions.output('auth')
         const token = authenticationResponse.data.token;
@@ -53,7 +53,7 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
         input.context.getFullContext()[args.contextStore] = { "error": error.message };
         resolve(input);
       })
-    );
+      );
   });
 }
 module.exports.listAutomations = listAutomations;
