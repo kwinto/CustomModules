@@ -24,9 +24,9 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
-    const fileListResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/repository/file/list', {}, options);
+    const response = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/repository/file/list', {}, options);
 
-    input.actions.addToContext(contextStore, fileListResponse.data, 'simple');
+    input.actions.addToContext(contextStore, response.data, 'simple');
   } catch (error) {
     if (stopOnError) {
       throw new Error(error.message);
@@ -63,9 +63,9 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
 
   try {
     const options = await authenticate(input, username, password, contextStore, stopOnError);
-    const fileListResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/activity/list', {}, options);
+    const response = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v2/activity/list', {}, options);
 
-    input.actions.addToContext(contextStore, fileListResponse.data, 'simple');
+    input.actions.addToContext(contextStore, response.data, 'simple');
   } catch (error) {
     if (stopOnError) {
       throw new Error(error.message);
