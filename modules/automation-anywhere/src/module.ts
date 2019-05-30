@@ -22,15 +22,8 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
   if (!url) throw new Error("Secret is missing the 'username' url.");
   if (!password) throw new Error("Secret is missing the 'password' field.");
 
-  const payload = {
-    username,
-    password
-  };
-
   try {
-    const authenticationResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload);
-
-    const token = authenticationResponse.data.token;
+    const token = await authenticate(input, username, password, contextStore, stopOnError);
     const options = {
       headers: {
         'X-Authorization': token
@@ -74,15 +67,8 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
   if (!url) throw new Error("Secret is missing the 'username' url.");
   if (!password) throw new Error("Secret is missing the 'password' field.");
 
-  const payload = {
-    username,
-    password
-  };
-
   try {
-    const authenticationResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload);
-
-    const token = authenticationResponse.data.token;
+    const token = await authenticate(input, username, password, contextStore, stopOnError);
     const options = {
       headers: {
         'X-Authorization': token
@@ -104,3 +90,27 @@ async function listActivities(input: any, args: { secret: CognigySecret, context
 }
 module.exports.listActivities = listActivities;
 
+
+async function authenticate(input: any, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<string> {
+
+  let token = "";
+
+  const payload = {
+    username,
+    password
+  };
+
+  try {
+    const authenticationResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload);
+
+    token = authenticationResponse.data.token;
+  } catch (error) {
+    if (stopOnError) {
+      throw new Error(error.message);
+    } else {
+      input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+    }
+  }
+
+  return token;
+}
