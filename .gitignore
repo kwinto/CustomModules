@@ -1,3 +1,5 @@
+/**/credentials.json
+/**/token.json
 modules/*/build
 modules/*/node_modules
 modules/*/src/shared
@@ -8,5 +10,6 @@ modules/service-endpoint/gactions
 coverage/
 *.zip
 .idea
+*.bat
 
 /**/.DS_Store
