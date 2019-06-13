@@ -1,5 +1,5 @@
 {
-  "name": "Elastic-Search",
+  "name": "elastic-search",
   "version": "1.0.0",
   "description": "Elastic Search Custom Module",
   "main": "build/module.js",
