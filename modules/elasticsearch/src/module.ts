@@ -1,4 +1,4 @@
-const elasticsearch = require('elasticsearch');
+import elasticsearch from 'elasticsearch';
 
 /**
  * Finds spelling mistakes and predicts the correct word.
