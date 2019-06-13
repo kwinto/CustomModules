@@ -13,7 +13,7 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, username, password, contextStore, stopOnError);
+    const options = await authenticate(input, url, username, password, contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/repository/file/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
@@ -42,7 +42,7 @@ async function listBotExecutions(input: any, args: { secret: CognigySecret, cont
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, username, password, contextStore, stopOnError);
+    const options = await authenticate(input, url, username, password, contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/activity/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
@@ -71,7 +71,7 @@ async function listDevices(input: any, args: { secret: CognigySecret, contextSto
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, username, password, contextStore, stopOnError);
+    const options = await authenticate(input, url, username, password, contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/devices/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
@@ -88,7 +88,7 @@ async function listDevices(input: any, args: { secret: CognigySecret, contextSto
 module.exports.listDevices = listDevices;
 
 
-async function authenticate(input: any, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<object> {
+async function authenticate(input: any, url: string, username: string, password: string, contextStore: string, stopOnError: boolean): Promise<object> {
 
   let options = {};
   const payload = {
@@ -97,7 +97,7 @@ async function authenticate(input: any, username: string, password: string, cont
   };
 
   try {
-    const authenticationResponse = await axios.post('https://fvvzacu1.ce.automationanywhere.digital/v1/authentication', payload);
+    const authenticationResponse = await axios.post(`${url}/v1/authentication`, payload);
     const token = authenticationResponse.data.token;
 
     options = {
