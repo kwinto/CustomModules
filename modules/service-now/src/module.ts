@@ -1,6 +1,5 @@
 import axios from 'axios';
 import * as http from 'https';
-import { networkInterfaces } from 'os';
 
 
 /**
@@ -8,13 +7,15 @@ import { networkInterfaces } from 'os';
  * @arg {SecretSelect} `secret` 1 The configured secret to use
  * @arg {CognigyScript} `tableName` 1 The name of the table you want to query
  * @arg {Number} `limit` The limit of the shown results
+ * @arg {CognigyScript} `caller_id` 1 The username of the peron that created the ticket
+ * @arg {CognigyScript} `assigned_to` 1 The username of the peron that the ticket is currently assigned to
  * @arg {Boolean} `stopOnError` 1 Whether to stop on error or continue
  * @arg {CognigyScript} `store` 1 Where to store the result
  */
-async function GETFromTable(input: IFlowInput, args: { secret: CognigySecret, tableName: string, limit?: number, stopOnError: boolean, store: string }): Promise<IFlowInput | {}> {
+async function GETFromTable(input: IFlowInput, args: { secret: CognigySecret, tableName: string, limit?: number, caller_id?: string, assigned_to?: string, stopOnError: boolean, store: string }): Promise<IFlowInput | {}> {
 
     /* validate node arguments */
-    const { secret, tableName, store, stopOnError, limit } = args;
+    const { secret, tableName, store, stopOnError, limit, assigned_to, caller_id  } = args;
     if (!secret) throw new Error("Secret not defined.");
     if (!tableName) throw new Error("Table name not defined.");
     if (!store) throw new Error("Context store not defined.");
@@ -27,7 +28,8 @@ async function GETFromTable(input: IFlowInput, args: { secret: CognigySecret, ta
     if (!instance) throw new Error("Secret is missing the 'instance' field.");
 
     try {
-        const response = await axios.get(`${instance}/api/now/table/${tableName}`, {
+        // TODO: interface
+        const options: any = {
             headers: {
                 'Accept': 'application/json'
             },
@@ -36,10 +38,23 @@ async function GETFromTable(input: IFlowInput, args: { secret: CognigySecret, ta
                 password
             },
             params: {
-                sysparm_limit: limit
+                sysparm_limit: limit,
+                caller_id,
+                sysparm_query: "ORDERBYDESCnumber",
+                sysparm_display_value: true
             }
-        });
+        }
 
+        if (assigned_to) {
+            options.params.assigned_to = assigned_to;
+        }
+
+        const response = await axios.get(`${instance}/api/now/table/${tableName}`, options );
+
+       
+
+        // input.actions.output(JSON.stringify(response.data.result), null);
+        // input.actions.output(JSON.stringify(response.data.result.length), null);
         input.actions.addToContext(store, response.data.result, 'simple');
     } catch (error) {
         if (stopOnError) {
