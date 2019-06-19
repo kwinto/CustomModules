@@ -51,10 +51,6 @@ async function GETFromTable(input: IFlowInput, args: { secret: CognigySecret, ta
 
         const response = await axios.get(`${instance}/api/now/table/${tableName}`, options );
 
-       
-
-        // input.actions.output(JSON.stringify(response.data.result), null);
-        // input.actions.output(JSON.stringify(response.data.result.length), null);
         input.actions.addToContext(store, response.data.result, 'simple');
     } catch (error) {
         if (stopOnError) {
