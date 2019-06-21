@@ -7,7 +7,7 @@ import elasticsearch from 'elasticsearch';
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function simpleSearch(input: IFlowInput, args: { secret: CognigySecret, query: string, language: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}>  {
+async function simpleSearch(input: IFlowInput, args: { secret: CognigySecret, query: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}>  {
 
     const { secret, query, contextStore, stopOnError } = args;
     const { host } = secret;
