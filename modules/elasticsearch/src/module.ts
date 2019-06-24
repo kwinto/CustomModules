@@ -1,4 +1,4 @@
-import elasticsearch from 'elasticsearch';
+import * as elasticsearch from 'elasticsearch';
 
 /**
  * Simple elastic search.
@@ -18,7 +18,7 @@ async function simpleSearch(input: IFlowInput, args: { secret: CognigySecret, qu
     if (!contextStore) throw new Error("No context store defined");
 
 
-    const client = new elasticsearch.Client({
+    const client = await new elasticsearch.Client({
         host,
         log: 'trace'
     });
