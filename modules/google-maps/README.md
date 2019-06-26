@@ -17,8 +17,8 @@ There are two ways to use this Custom Module. Use the Google Maps Geocoding API 
     - address
 If the Searchquery field is empty or no Place was found, it use the default values from Latitude and Longitude. 
 The fields look like this:
-![Create Location Node](./docs/google-maps-node.png)
+![Create Location Node](./docs/google-maps-node.PNG)
 
 **View**
 In combination with the google-maps Webchat Plugin you get this view:
-![Create Location Node](./docs/google-maps-Webchat.png)
+![Create Location Node](./docs/google-maps-Webchat.PNG)
