@@ -11,12 +11,10 @@ This modules needs a CognigySecret to be defined and passed to the Nodes. The se
 
 **Properties**
 
-There are two ways to use this Custom Module. Use the Google Maps Geocoding API to get the longitude and latitude of the address. 
-    Such as the [documentation](https://developers.google.com/maps/documentation/geocoding/start) says, you can add the properties as a simple string: 
+There are two ways to use this Custom Module. Use the [Google Maps Geocoding API](https://developers.google.com/maps/documentation/geocoding/start) to get the longitude and latitude of the address. 
 
-    - address
-If the Searchquery field is empty or no Place was found, it use the default values from Latitude and Longitude. 
-The fields look like this:
+If the Searchquery field is empty or no Place was found, the module use the default values from Latitude and Longitude. 
+Here is an example of a filled google-maps node:
 ![Create Location Node](./docs/google-maps-node.PNG)
 
 **View**
