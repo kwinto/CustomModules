@@ -7,7 +7,7 @@ This module is based on node-request-promise (https://www.npmjs.com/package/requ
 This modules needs a CognigySecret to be defined and passed to the Nodes. The secret must have the following keys:
 
 - **key**:  api_key
-- **value**: Your Google Maps <<API KEY>>
+- **value**: Your Google Maps API KEY
 
 **Properties**
 
