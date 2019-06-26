@@ -1,7 +1,7 @@
 {
 	"name": "google-maps-plugin",
 	"version": "1.0.0",
-	"description": "Demonstrates how to use the Cognigy Integration Framework",
+	"description": "This module adds a Google Maps node to Cognigy.AI",
 	"main": "src/module.js",
 	"scripts": {
 		"test": "node test/test.js",
