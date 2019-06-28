@@ -1,6 +1,6 @@
 /**
  * Describes the function
- * @arg {JSON} `secret` The configured secret to use
+ * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `arg1` An argument of type CognigyScript
  * @arg {select[option1,option2,option3]} `arg2` An argument of type Select (=Dropdown)
  * @arg {Number} `arg3` An argument of type Number

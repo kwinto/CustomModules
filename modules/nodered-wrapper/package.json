@@ -1,7 +1,7 @@
 {
-  "name": "cognigy-blueprint",
+  "name": "cognigy-nodered",
   "version": "1.0.0",
-  "description": "Demonstrates how to use the Cognigy Integration Framework",
+  "description": "Shows how to integrate NodeRed modules",
   "main": "build/module.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
