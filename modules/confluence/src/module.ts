@@ -7,7 +7,6 @@ const rp = require('request-promise');
  * @arg {CognigyScript} `confluenceSpace` The Space for which a lexicon should be generated
  * @arg {CognigyScript} `lexiconId` The ID of the relevant lexicon. Can be obtained by created a lexicon and copying the ID (menu, top-right corner).
  * @arg {CognigyScript} `lexiconTagName` The name of the lexicon Tag (e.g. Device or Product or ...)
- * @arg {Number} `maxResults` The maximum number of results you want (optional)
  * @arg {Boolean} `writeToContext` Whether to write to Cognigy Context (true) or Input (false)
  * @arg {CognigyScript} `store` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
@@ -18,7 +17,6 @@ async function generateLexicon(input: IFlowInput, args:
 		confluenceSpace: string, 
 		lexiconId: string, 
 		lexiconTagName: string, 
-		maxResults: string, 
 		writeToContext: boolean, 
 		store: string, 
 		stopOnError: boolean 
@@ -102,11 +100,9 @@ module.exports.generateLexicon = generateLexicon;
 
 
 /**
- * This generates a custom Lexicon based on the labels within a certain Confluence Space. 
- * This typically needs to be used only once to generate a lexicon. The lexicon itself will be persisted automatically. 
+ * Returns all pages within a specific Confluence Space.
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `confluenceSpace` The Space for which a lexicon should be generated
- * @arg {Number} `maxResults` The maximum number of results you want (optional)
  * @arg {Boolean} `writeToContext` Whether to write to Cognigy Context (true) or Input (false)
  * @arg {CognigyScript} `store` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
@@ -115,7 +111,6 @@ async function getAllPages(input: IFlowInput, args:
 	{ 
 		secret: CognigySecret, 
 		confluenceSpace: string, 
-		maxResults: number, 
 		writeToContext: boolean, 
 		store: string, 
 		stopOnError: boolean 
@@ -133,10 +128,7 @@ async function getAllPages(input: IFlowInput, args:
 		baseUrl:  args.secret.baseUrl
 	};
 
-	let limit = 9999;
-	if(args.maxResults && args.maxResults !== 0) {
-		limit = args.maxResults;
-	}
+
 	let options = {
 		uri: `${config.baseUrl}/wiki/rest/api/content?type=page&&spacekey=${args.confluenceSpace}start=0&limit=99999&expand=body.storage`,
 		auth: {
@@ -197,7 +189,6 @@ module.exports.getAllPages = getAllPages;
  * This exposes a search function. Use the 'searchInput' property to query using individual terms or sentences. 
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `searchInput` The search input. Can be a single word or a string. 
- * @arg {Number} `maxResults` The maximum number of results you want (optional)
  * @arg {Boolean} `writeToContext` Whether to write to Cognigy Context (true) or Input (false)
  * @arg {CognigyScript} `store` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
@@ -206,7 +197,6 @@ async function searchText(input: IFlowInput, args:
 	{ 
 		secret: CognigySecret, 
 		searchInput: string, 
-		maxResults: number, 
 		writeToContext: boolean, 
 		store: string, 
 		stopOnError: boolean 
@@ -224,10 +214,6 @@ async function searchText(input: IFlowInput, args:
 		baseUrl:  args.secret.baseUrl
 	};
 
-	let limit = 9999;
-	if(args.maxResults && args.maxResults !== 0) {
-		limit = args.maxResults;
-	}
 	let options = {
 		uri: `${config.baseUrl}/wiki/rest/api/content/search?cql=type=page+and+text~"${args.searchInput}"+order+by+id+asc&expand=body.storage`,
 		auth: {
