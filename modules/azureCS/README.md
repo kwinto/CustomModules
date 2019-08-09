@@ -270,7 +270,7 @@ language: "de"
   }
 ```
 
-## Node: StartAuthentication
+## Node: Start Authentication
 
 This node starts the Webchat plugin `microsoft_auth` to open the **Login with Microsoft** button in the webchat. After the user logged in via Microsoft, the Node will redirect the information to the given **redirectUri**. This callback could do something like: 
 ```javascript
@@ -298,7 +298,7 @@ This code searches for the authenticatoin information and sends them back to the
 
 The needed authentication code is stored in `ci.data.microsoftAuth.code`. You'll need it for the next Node. 
 
-## Node: GetAuthenticationToken
+## Node: Get Authentication Token
 
 This node returns the final `access_token`, such as the following: 
 ```json
