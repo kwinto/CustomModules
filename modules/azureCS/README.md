@@ -270,7 +270,7 @@ language: "de"
   }
 ```
 
-## Node: Start Authentication
+## Node: Start Authentication With ADAL
 
 This node starts the Webchat plugin `microsoft_auth` to open the **Login with Microsoft** button in the webchat. After the user logged in via Microsoft, the Node will redirect the information to the given **redirectUri**. This callback could do something like: 
 ```javascript
@@ -298,7 +298,7 @@ This code searches for the authenticatoin information and sends them back to the
 
 The needed authentication code is stored in `ci.data.microsoftAuth.code`. You'll need it for the next Node. 
 
-## Node: Get Authentication Token
+## Node: Get Authentication Token With ADAL
 
 This node returns the final `access_token`, such as the following: 
 ```json
@@ -313,7 +313,7 @@ This node returns the final `access_token`, such as the following:
     }
 }
 ```
-You have to use the `authCode`, you got from the **StartAuthentication** node. Use the Cognigy Script feature and extract the value from the input object: 
+You have to use the `authCode`, you got from the **Start Authentication With ADAL** node. Use the Cognigy Script feature and extract the value from the input object: 
 ```
 {{ci.data.microsoftAuth.code}}
 ```
