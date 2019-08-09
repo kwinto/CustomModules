@@ -583,7 +583,7 @@ module.exports.analyseSentiments = analyseSentiments;
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function startAuthentication(input: IFlowInput, args: { secret: CognigySecret, redirectUri: string, scope: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function startAuthenticationWithADAL(input: IFlowInput, args: { secret: CognigySecret, redirectUri: string, scope: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
     /* validate node arguments */
     const { secret, redirectUri, scope, contextStore, stopOnError } = args;
@@ -611,10 +611,10 @@ async function startAuthentication(input: IFlowInput, args: { secret: CognigySec
     return input;
 }
 
-module.exports.startAuthentication = startAuthentication;
+module.exports.startAuthenticationWithADAL = startAuthenticationWithADAL;
 
 /**
- * Authenticates the user via Microsoft login
+ * Gets the authentication acces token from Microsoft
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `redirectUri` The url which should be triggered after user is logged in with microsoft
  * @arg {CognigyScript} `scope` For example user.read
@@ -622,7 +622,7 @@ module.exports.startAuthentication = startAuthentication;
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function getAuthenticationToken(input: IFlowInput, args: { secret: CognigySecret, redirectUri: string, scope: string, authCode: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function getAuthenticationTokenWithADAL(input: IFlowInput, args: { secret: CognigySecret, redirectUri: string, scope: string, authCode: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
     /* validate node arguments */
     const { secret, redirectUri, scope, authCode, contextStore, stopOnError } = args;
@@ -664,4 +664,4 @@ async function getAuthenticationToken(input: IFlowInput, args: { secret: Cognigy
     return input;
 }
 
-module.exports.getAuthenticationToken = getAuthenticationToken;
+module.exports.getAuthenticationTokenWithADAL = getAuthenticationTokenWithADAL;
