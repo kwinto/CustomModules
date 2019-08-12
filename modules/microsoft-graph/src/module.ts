@@ -3,15 +3,17 @@ import { Client } from "@microsoft/microsoft-graph-client";
 /**
  * Get the user details.
  * @arg {CognigyScript} `accessToken` The text to analyse
- * @arg {Select[me,all]} `userSource` The user information source
+ * @arg {Select[me,all,specific person]} `userSource` The user information source
+ * @arg {CognigyScript} `userMail` `Only necessary if you want to get infos of a specific person! The person's email address.`
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function getUserDetails(input: IFlowInput, args: { accessToken: string, userSource: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function getUserDetails(input: IFlowInput, args: { accessToken: string, userSource: string, userMail?: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
     // Check parameters
-    const { accessToken, userSource, contextStore, stopOnError } = args;
+    const { accessToken, userSource, userMail, contextStore, stopOnError } = args;
     if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
     if (!userSource) return Promise.reject("No user source defined. If you want to get your own information, use 'me', otherwise get the information of all users by selecting 'all'.");
+    if (userSource === "specific person" && !userMail) return Promise.reject("You have to define the user's mail who you want to search for.");
     if (!contextStore) return Promise.reject("No context store key defined.");
     if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
 
@@ -19,10 +21,11 @@ async function getUserDetails(input: IFlowInput, args: { accessToken: string, us
         const client: Client = getAuthenticatedClient(accessToken);
         let path: string = "";
 
-        if (userSource === "me") path = "me";
-        else if (userSource === "users") path = "all";
+        if (userSource === "me") path = "/me";
+        else if (userSource === "all") path = "/users";
+        else if (userSource === "specific person") path = `/users/${userMail}`;
 
-        const user = await client.api(`/${path}`).get();
+        const user = await client.api(path).get();
 
         input.actions.addToContext(contextStore, user, 'simple');
     } catch (error) {
@@ -37,6 +40,47 @@ async function getUserDetails(input: IFlowInput, args: { accessToken: string, us
 }
 
 module.exports.getUserDetails = getUserDetails;
+
+/**
+ * Gets events from calendars.
+ * @arg {CognigyScript} `accessToken` The text to analyse
+ * @arg {Select[me,all,specific person]} `userSource` The user information source
+ * @arg {CognigyScript} `userMail` `Only necessary if you want to get infos of a specific person! The person's email address.`
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function getEventsFromCalendar(input: IFlowInput, args: { accessToken: string, userSource: string, userMail?: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+    // Check parameters
+    const { accessToken, userSource, userMail, contextStore, stopOnError } = args;
+    if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
+    if (!userSource) return Promise.reject("No user source defined. If you want to get your own information, use 'me', otherwise get the information of all users by selecting 'all'.");
+    if (userSource === "specific person" && !userMail) return Promise.reject("You have to define the user's mail who you want to search for.");
+    if (!contextStore) return Promise.reject("No context store key defined.");
+    if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+    try {
+        const client: Client = getAuthenticatedClient(accessToken);
+        let path: string = "";
+
+        if (userSource === "me") path = "/me/events";
+        else if (userSource === "all") path = "/me/calendar/events";
+        else if (userSource === "specific person") path = `/users/${userMail}/calendar/events`;
+
+        const user = await client.api(path).get();
+
+        input.actions.addToContext(contextStore, user, 'simple');
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    return input;
+}
+
+module.exports.getEventsFromCalendar = getEventsFromCalendar;
 
 /**
  * Send a mail with the logged in user.
