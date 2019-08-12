@@ -3,20 +3,26 @@ import { Client } from "@microsoft/microsoft-graph-client";
 /**
  * Get the user details.
  * @arg {CognigyScript} `accessToken` The text to analyse
+ * @arg {Select[me,all]} `userSource` The user information source
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function getUserDetails(input: IFlowInput, args: { accessToken: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function getUserDetails(input: IFlowInput, args: { accessToken: string, userSource: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
     // Check parameters
-    const { accessToken, contextStore, stopOnError } = args;
+    const { accessToken, userSource, contextStore, stopOnError } = args;
     if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
+    if (!userSource) return Promise.reject("No user source defined. If you want to get your own information, use 'me', otherwise get the information of all users by selecting 'all'.");
     if (!contextStore) return Promise.reject("No context store key defined.");
     if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
 
     try {
-        const client = getAuthenticatedClient(accessToken);
+        const client: Client = getAuthenticatedClient(accessToken);
+        let path: string = "";
 
-        const user = await client.api('/me').get();
+        if (userSource === "me") path = "me";
+        else if (userSource === "users") path = "all";
+
+        const user = await client.api(`/${path}`).get();
 
         input.actions.addToContext(contextStore, user, 'simple');
     } catch (error) {
