@@ -19,7 +19,7 @@ async function signInToGraph(input: IFlowInput, args: { secret: CognigySecret, r
     if (!clientSecret) return Promise.reject("Secret is missing the 'clientSecret' field.");
 
     try {
-        const callback = (errorDesc, token, error, tokenType) => {};
+        const callback = (errorDesc, token, error, tokenType) => { };
         // An Optional options for initializing the MSAL @see https://github.com/AzureAD/microsoft-authentication-library-for-js/wiki/MSAL-basics#configuration-options
         const options = {
             redirectUri,
@@ -190,6 +190,79 @@ async function sendMail(input: IFlowInput, args: { accessToken: string, recipien
 
 module.exports.sendMail = sendMail;
 
+/**
+ * Schedule a new meeting.
+ * @arg {CognigyScript} `accessToken` The text to analyse
+ * @arg {Select[UTC,PST]} `timeZone` The meeting's time zone
+ * @arg {CognigyScript} `subject` The meeting's subject
+ * @arg {CognigyScript} `content` The meeting's content
+ * @arg {Select[html,text]} `contentType` The content's type
+ * @arg {CognigyScript} `startTime` The meeting's start time
+ * @arg {CognigyScript} `endTime` The meeting's end time
+ * @arg {CognigyScriptArray} `attendees` The mails of all attendees. Not required!
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function scheduleMeeting(input: IFlowInput, args: { accessToken: string, timeZone: string, subject: string, content: string, contentType: string, startTime: string, endTime: string, attendees?: string[], contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+    // Check parameters
+    const { accessToken, timeZone, subject, content, contentType, startTime, endTime, attendees, contextStore, stopOnError } = args;
+    if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
+    if (!timeZone) return Promise.reject("No time zone defined.");
+    if (!startTime) return Promise.reject("No start time defined.");
+    if (!endTime) return Promise.reject("No end time defined.");
+    if (!subject) return Promise.reject("No meeting subject defined.");
+    if (!content) return Promise.reject("No content defined.");
+    if (!contentType) return Promise.reject("No content type defined.");
+    if (!contextStore) return Promise.reject("No  defined.");
+    if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+    try {
+        const client = getAuthenticatedClient(accessToken);
+
+
+        const meeting = {
+            subject,
+            body: {
+                contentType,
+                content
+            },
+            start: {
+                dateTime: startTime,
+                timeZone
+            },
+            end: {
+                dateTime: endTime,
+                timeZone
+            },
+            attendees: createAttendeesList(attendees)
+        };
+
+
+        try {
+            const response = await client.api("/me/events").post(meeting);
+
+            input.actions.addToContext(contextStore, response, 'simple');
+        } catch (error) {
+            if (stopOnError) {
+                throw new Error(error.message);
+            } else {
+                input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+            }
+        }
+
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    return input;
+}
+
+module.exports.scheduleMeeting = scheduleMeeting;
+
 function getAuthenticatedClient(accessToken: string): Client {
     // Initialize Graph client
     const client = Client.init({
@@ -200,4 +273,21 @@ function getAuthenticatedClient(accessToken: string): Client {
     });
 
     return client;
+}
+
+function createAttendeesList(attendees: string[]): object[] {
+
+    const list: object[] = [];
+
+    for (const a of attendees) {
+        list.push({
+            emailAddress: {
+              address: a,
+              name: "Janet Schorr"
+            },
+            type: "Required"
+          });
+        }
+
+    return list;
 }
