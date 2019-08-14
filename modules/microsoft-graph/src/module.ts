@@ -289,6 +289,62 @@ async function getContacts(input: IFlowInput, args: { accessToken: string, conte
 
 module.exports.getContacts = getContacts;
 
+/**
+ * Schedule a new meeting.
+ * @arg {CognigyScript} `accessToken` The text to analyse
+ * @arg {CognigyScript} `firstName` The contact's first name
+ * @arg {CognigyScript} `lastName` The contact's last name
+ * @arg {CognigyScriptArray} `emailAddresses` The contact's email addresses
+ * @arg {CognigyScriptArray} `businessPhones` The content's type
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function addContact(input: IFlowInput, args: { accessToken: string, firstName: string, lastName: string, emailAddresses: string[], businessPhones: string[], contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+    // Check parameters
+    const { accessToken, firstName, lastName, emailAddresses, businessPhones, contextStore, stopOnError } = args;
+    if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
+    if (!firstName) return Promise.reject("No first name defined.");
+    if (!lastName) return Promise.reject("No last name defined.");
+    if (!emailAddresses) return Promise.reject("No email addresses defined.");
+    if (!businessPhones) return Promise.reject("No business phones defined.");
+    if (!contextStore) return Promise.reject("No context store defined.");
+    if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+    try {
+        const client = getAuthenticatedClient(accessToken);
+
+        const contact = {
+            givenName: firstName,
+            surname: lastName,
+            emailAddresses: getEmailAddressesForContact(firstName, lastName, emailAddresses),
+            businessPhones
+        };
+
+        try {
+            const response = await client.api("/me/contacts").post(contact);
+
+            input.actions.addToContext(contextStore, response, 'simple');
+        } catch (error) {
+            if (stopOnError) {
+                throw new Error(error.message);
+            } else {
+                input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+            }
+        }
+
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    return input;
+}
+
+module.exports.addContact = addContact;
+
 
 function getAuthenticatedClient(accessToken: string): Client {
     // Initialize Graph client
@@ -329,6 +385,20 @@ function createAttendeesList(attendees: string[]): object[] {
             },
             type: "Required"
           });
+        }
+
+    return list;
+}
+
+function getEmailAddressesForContact(firstName: string, lastName: string, emailAddress: string[]): object[] {
+
+    const list: object[] = [];
+
+    for (const e of emailAddress) {
+        list.push({
+            address: e,
+            name: `${firstName} ${lastName}`
+            });
         }
 
     return list;
