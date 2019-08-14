@@ -283,7 +283,7 @@ function createAttendeesList(attendees: string[]): object[] {
         list.push({
             emailAddress: {
               address: a,
-              name: "Janet Schorr"
+              name: "Guest"
             },
             type: "Required"
           });
