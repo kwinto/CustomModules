@@ -153,13 +153,7 @@ async function sendMail(input: IFlowInput, args: { accessToken: string, recipien
         // Construct email object
         const mail = {
             subject,
-            toRecipients: [
-                {
-                    emailAddress: {
-                        address: recipients[0],
-                    },
-                },
-            ],
+            toRecipients: createRecipientsList(recipients),
             body: {
                 content,
                 contentType,
@@ -273,6 +267,21 @@ function getAuthenticatedClient(accessToken: string): Client {
     });
 
     return client;
+}
+
+function createRecipientsList(recipients: string[]): object[] {
+
+    const list: object[] = [];
+
+    for (const r of recipients) {
+        list.push({
+            emailAddress: {
+                address: r,
+             },
+        });
+    }
+
+    return list;
 }
 
 function createAttendeesList(attendees: string[]): object[] {
