@@ -257,6 +257,39 @@ async function scheduleMeeting(input: IFlowInput, args: { accessToken: string, t
 
 module.exports.scheduleMeeting = scheduleMeeting;
 
+/**
+ * Get all your contacts.
+ * @arg {CognigyScript} `accessToken` The text to analyse
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function getContacts(input: IFlowInput, args: { accessToken: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+    // Check parameters
+    const { accessToken, contextStore, stopOnError } = args;
+    if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
+    if (!contextStore) return Promise.reject("No context store key defined.");
+    if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+    try {
+        const client: Client = getAuthenticatedClient(accessToken);
+
+        const user = await client.api('me/contacts').get();
+
+        input.actions.addToContext(contextStore, user, 'simple');
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    return input;
+}
+
+module.exports.getContacts = getContacts;
+
+
 function getAuthenticatedClient(accessToken: string): Client {
     // Initialize Graph client
     const client = Client.init({
