@@ -1,7 +1,7 @@
 {
 	"name": "detect-language",
 	"version": "1.0.0",
-	"description": "Detects the language of the input text.",
+	"description": "Detects the language of the input text. The module builds on Node Language Detect by FGRibreau: https://github.com/FGRibreau/node-language-detect ",
 	"main": "build/module.js",
 	"scripts": {
 		"test": "node test/test.js",
