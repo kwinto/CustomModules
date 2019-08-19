@@ -95,14 +95,8 @@ async function getWordDocument(input: IFlowInput, args: {
 
     // Check if the args are given
     if (!url) throw new Error("No post api url defined");
-    if (!firstName) throw new Error("The first name is missing.");
-    if (!middleName) throw new Error("The middle name is missing.");
-    if (!lastName) throw new Error("The last name is missing.");
-    if (!birthday) throw new Error("The birthday is missing.");
     if (!email) throw new Error("The email address is missing.");
     if (!phoneNumber) throw new Error("The phone number is missing.");
-    if (!nationality) throw new Error("The nationality is missing.");
-    if (!address) throw new Error("The user address is missing. Format: Mainstreet 1 10110 Berlin");
     if (!accountType) throw new Error("The account type is missing.");
     if (!monthlyIncome) throw new Error("The monthly income is missing.");
     if (!contextStore) throw new Error("The context Store is missing.");
