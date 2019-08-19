@@ -155,6 +155,130 @@ async function getWordDocument(input: IFlowInput, args: {
 
 module.exports.getWordDocument = getWordDocument;
 
+
+/**
+ * Takes the user's data and creates a Word document, which is retuned as Base64 string
+ * @arg {CognigySecret} `secret` The provided Cognigy secret
+ * @arg {CognigyScript} `url` The API post url without path and /
+ * @arg {CognigyScript} `wordDocumentBase64` The word document as a base64 string
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function getSigningDocument(input: IFlowInput, args: { secret: CognigySecret, url: string, wordDocumentBase64: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+
+    const { secret, url, wordDocumentBase64, contextStore, stopOnError } = args;
+    const { api_key } = secret;
+
+    if (!wordDocumentBase64) throw new Error('The word document base64 string is not defined.');
+    if (!url) throw new Error('The API base url is not defined.');
+    if (!secret) throw new Error('The secret is not defined');
+    if (!api_key) throw new Error("The secret is missing the 'api_key' field.");
+
+    const body = {
+        "name": "Account opening",
+        "type": "PACKAGE",
+        "processingType": "SEQ",
+        "signers": [
+            {
+                "id": "Signer",
+                "role": "SIGNER",
+                "name": "Customer"
+            }
+        ],
+        "documents": [
+            {
+                "name": "Schedule",
+                "description": "Example",
+                "format": "MS_WORD",
+                "content": {
+                    "$cs": {
+                        "script": wordDocumentBase64,
+                        "type": "string"
+                    }
+                },
+                "order": 1,
+                "documentMessage": "A customizable message",
+                "fileName": "DEMO.docx",
+                "signatureFields": [
+                    {
+                        "name": "signature-1",
+                        "signerId": "Signer",
+                        "required": false,
+                        "readOnly": false,
+                        "page": 1,
+                        "posx": 70,
+                        "posy": 70,
+                        "width": 250,
+                        "height": 90,
+                        "signingModeOptions": [
+                            "HW"
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+
+    try {
+
+        const signDocResponse = await axios.post(`${url}/cirrus/rest/v6/package?schedule=false&delete_existing=false&autoprepare=false`, body, {
+            headers: {
+                'Content-Type': 'aaplication/json',
+                'api-key': api_key,
+                'X-API-Key': api_key
+            }
+        });
+
+        const signDocResponseUpdate = await axios.put(`${url}/cirrus/rest/v6/packages/${signDocResponse.data.result.id}`,
+            {
+                "state": "PREPARED"
+            },
+            {
+                headers: {
+                    'Content-Type': 'aaplication/json',
+                    'api-key': api_key,
+                    'X-API-Key': api_key
+                }
+            });
+
+        const signDocResponseCreateLink = await axios.post(`${url}/cirrus/rest/v6/packages/${signDocResponse.data.result.id}/signingsession/common`,
+            {
+
+                "manualSignerAuthentications": [
+                    {
+                        "signerId": "Signer",
+                        "passport": true
+                    }
+                ],
+                "qrCodeSpecifications": {
+                    "imageType": "JPG",
+                    "width": 200,
+                    "height": 200
+                }
+
+            },
+            {
+                headers: {
+                    'Content-Type': 'aaplication/json',
+                    'api-key': api_key,
+                    'X-API-Key': api_key
+                }
+            });
+
+        input.actions.addToContext(contextStore, signDocResponseCreateLink.data, 'simple');
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    return input;
+}
+
+module.exports.getSigningDocument = getSigningDocument;
+
 function createBase64StringFromUserData(
     firstName: string,
     lastName: string,
