@@ -1,2 +1,2 @@
-﻿# Blueprint Custom Module
+﻿# UIPath
 Shows what this module does

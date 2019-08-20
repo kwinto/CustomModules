@@ -59,6 +59,7 @@ async function AddQueueItem(input: IFlowInput, args: { secret: CognigySecret, qu
             response = parsedBody;
             accessToken = parsedBody.access_token;
 
+			
             let finalOptions = {
 				method: 'POST',
 				url: `https://platform.uipath.com/${args.secret.account_logical_name}/${args.secret.service_instance_logical_name}/odata/Queues/UiPathODataSvc.AddQueueItem`,	
@@ -77,6 +78,8 @@ async function AddQueueItem(input: IFlowInput, args: { secret: CognigySecret, qu
             rp(finalOptions)
             .then((parsedBody) => { 
 
+				// input.context.getFullContext()[args.store] = parsedBody;
+			 	// resolve(input);
 				let pollingRequestOptions = {
 					method: 'GET',
 					url: 'https://platform.uipath.com/cognigy/MyService09xh117935/odata/QueueItems',
@@ -110,6 +113,8 @@ async function AddQueueItem(input: IFlowInput, args: { secret: CognigySecret, qu
             })
             .catch((err)=> {
 				if (args.stopOnError) { reject(err); return; }
+				else  input.context.getFullContext()[args.store] = err;
+				resolve(input);
             })
 
             // res.send(accessToken)
@@ -293,11 +298,12 @@ module.exports.GetJobs = GetJobs;
  * @arg {CognigyScript} `releaseKey` The releaseKey. Use the GetReleases request to obtain the key. 
  * @arg {select[Specific,All]} `strategy` The job strategy
  * @arg {CognigyScript} `robotId` The ID of the Robot that needs to be triggered
+ * @arg {JSON} `inputArguments` The JSON payload
  * @arg {CognigyScript} `store` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
 async function StartJob(input: IFlowInput, 
-	args: { secret: CognigySecret, releaseKey: string, strategy: string, robotId: string, store: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+	args: { secret: CognigySecret, releaseKey: string, strategy: string, robotId: string, inputArguments: JSON, store: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 	// Check if secret exists and contains correct parameters  
 	if (!args.secret) return Promise.reject("Secret not defined or invalid.");
 	if (!args.releaseKey) return Promise.reject("Please provide a valid Release Key. Use the GetReleases operation to get a list of releases.");	
@@ -339,7 +345,7 @@ async function StartJob(input: IFlowInput,
 						"RobotIds": [ Number.parseInt(args.robotId) ],
 						"NoOfRobots": 0,
 						"Source": "Manual",
-						"InputArguments": "{\"greeting\":\"Aloha\"}"
+						"InputArguments": JSON.stringify(args.inputArguments)
 						} 
 					}
 
