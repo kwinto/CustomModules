@@ -10,7 +10,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot: string, project: string, body: JSON, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function RPARunRobot(input: IFlowInput, args: { secret: CognigySecret, robot: string, project: string, body: JSON, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
     const { secret, body, contextStore, stopOnError } = args;
     const { api_key } = secret;
@@ -42,7 +42,7 @@ async function RunRobot(input: IFlowInput, args: { secret: CognigySecret, robot:
     return input;
 }
 
-module.exports.RunRobot = RunRobot;
+module.exports.RPARunRobot = RPARunRobot;
 
 
 /**
@@ -61,7 +61,7 @@ module.exports.RunRobot = RunRobot;
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function getWordDocument(input: IFlowInput, args: {
+async function KCMgetDoc(input: IFlowInput, args: {
     url: string,
     firstName: string,
     lastName: string,
@@ -153,7 +153,7 @@ async function getWordDocument(input: IFlowInput, args: {
     return input;
 }
 
-module.exports.getWordDocument = getWordDocument;
+module.exports.KCMgetDoc = KCMgetDoc;
 
 
 /**
@@ -164,7 +164,7 @@ module.exports.getWordDocument = getWordDocument;
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function getSigningDocument(input: IFlowInput, args: { secret: CognigySecret, url: string, wordDocumentBase64: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function SignDocgetSigDoc(input: IFlowInput, args: { secret: CognigySecret, url: string, wordDocumentBase64: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
     const { secret, url, wordDocumentBase64, contextStore, stopOnError } = args;
     const { api_key } = secret;
@@ -295,7 +295,7 @@ async function getSigningDocument(input: IFlowInput, args: { secret: CognigySecr
     return input;
 }
 
-module.exports.getSigningDocument = getSigningDocument;
+module.exports.SignDocgetSigDoc = SignDocgetSigDoc;
 
 function createBase64StringFromUserData(
     firstName: string,
