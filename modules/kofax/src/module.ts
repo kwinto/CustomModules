@@ -158,7 +158,7 @@ module.exports.getWordDocument = getWordDocument;
 
 /**
  * Takes the user's data and creates a Word document, which is retuned as Base64 string
- * @arg {CognigySecret} `secret` The provided Cognigy secret
+ * @arg {SecretSelect} `secret` The provided Cognigy secret
  * @arg {CognigyScript} `url` The API post url without path and /
  * @arg {CognigyScript} `wordDocumentBase64` The word document as a base64 string
  * @arg {CognigyScript} `contextStore` Where to store the result
@@ -190,12 +190,7 @@ async function getSigningDocument(input: IFlowInput, args: { secret: CognigySecr
                 "name": "Schedule",
                 "description": "Example",
                 "format": "MS_WORD",
-                "content": {
-                    "$cs": {
-                        "script": wordDocumentBase64,
-                        "type": "string"
-                    }
-                },
+                "content": wordDocumentBase64,
                 "order": 1,
                 "documentMessage": "A customizable message",
                 "fileName": "DEMO.docx",
@@ -219,30 +214,55 @@ async function getSigningDocument(input: IFlowInput, args: { secret: CognigySecr
         ]
     };
 
+    let signDocResponse: any;
+
     try {
 
-        const signDocResponse = await axios.post(`${url}/cirrus/rest/v6/package?schedule=false&delete_existing=false&autoprepare=false`, body, {
+        signDocResponse = await axios({
+            method: 'POST',
+            url: `${url}/cirrus/rest/v6/package?schedule=false&delete_existing=false&autoprepare=false`,
+            data: JSON.stringify(body),
             headers: {
-                'Content-Type': 'aaplication/json',
+                'Content-Type': 'application/json; charset=utf-8',
                 'api-key': api_key,
                 'X-API-Key': api_key
-            }
-        });
+        }});
 
-        const signDocResponseUpdate = await axios.put(`${url}/cirrus/rest/v6/packages/${signDocResponse.data.result.id}`,
-            {
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    try {
+
+        const signDocResponseUpdate = await axios({
+            method: 'PUT',
+            url: `${url}/cirrus/rest/v6/packages/${signDocResponse.data.id}`,
+            data: {
                 "state": "PREPARED"
             },
-            {
-                headers: {
-                    'Content-Type': 'aaplication/json',
-                    'api-key': api_key,
-                    'X-API-Key': api_key
-                }
-            });
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'api-key': api_key,
+                'X-API-Key': api_key
+        }});
 
-        const signDocResponseCreateLink = await axios.post(`${url}/cirrus/rest/v6/packages/${signDocResponse.data.result.id}/signingsession/common`,
-            {
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    try {
+        const signDocResponseCreateLink = await axios({
+            method: 'POST',
+            url: `${url}/cirrus/rest/v6/packages/${signDocResponse.data.id}/signingsession/common`,
+            data:  {
 
                 "manualSignerAuthentications": [
                     {
@@ -257,13 +277,11 @@ async function getSigningDocument(input: IFlowInput, args: { secret: CognigySecr
                 }
 
             },
-            {
-                headers: {
-                    'Content-Type': 'aaplication/json',
-                    'api-key': api_key,
-                    'X-API-Key': api_key
-                }
-            });
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'api-key': api_key,
+                'X-API-Key': api_key
+        }});
 
         input.actions.addToContext(contextStore, signDocResponseCreateLink.data, 'simple');
     } catch (error) {
