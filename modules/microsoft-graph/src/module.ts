@@ -1,48 +1,5 @@
 import { Client } from "@microsoft/microsoft-graph-client";
 
-/**
- * Sign in to Microsoft Graph.
- * @arg {SecretSelect} `secret` The configured secret to use
- * @arg {CognigyScript} `redirectUri` The url to redirect after signing in
- * @arg {CognigyScript} `userMail` `Only necessary if you want to get infos of a specific person! The person's email address.`
- * @arg {CognigyScript} `contextStore` Where to store the result
- * @arg {Boolean} `stopOnError` Whether to stop on error or continue
- */
-async function signInToGraph(input: IFlowInput, args: { secret: CognigySecret, redirectUri: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
-    // Check secret
-    const { secret, redirectUri, contextStore, stopOnError } = args;
-    if (!secret) return Promise.reject("No secret defined.");
-
-    // check secrets
-    const { clientId, clientSecret } = secret;
-    if (!clientId) return Promise.reject("Secret is missing the 'clientId' field.");
-    if (!clientSecret) return Promise.reject("Secret is missing the 'clientSecret' field.");
-
-    try {
-        const callback = (errorDesc, token, error, tokenType) => { };
-        // An Optional options for initializing the MSAL @see https://github.com/AzureAD/microsoft-authentication-library-for-js/wiki/MSAL-basics#configuration-options
-        const options = {
-            redirectUri,
-        };
-        const graphScopes = ["user.read", "mail.send"]; // An array of graph scopes
-
-        // Initialize the MSAL @see https://github.com/AzureAD/microsoft-authentication-library-for-js/wiki/MSAL-basics#initialization-of-msal
-        // const userAgentApplication = new Msal.UserAgentApplication(clientId, undefined, callback, options);
-        // const authProvider = new MicrosoftGraph.MSALAuthenticationProvider(userAgentApplication, graphScopes);
-
-        input.actions.addToContext(contextStore, null, 'simple');
-    } catch (error) {
-        if (stopOnError) {
-            throw new Error(error.message);
-        } else {
-            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
-        }
-    }
-
-    return input;
-}
-
-module.exports.signInToGraph = signInToGraph;
 
 /**
  * Get the user details.
