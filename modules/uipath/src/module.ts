@@ -23,6 +23,16 @@ async function AddQueueItem(input: IFlowInput, args: { secret: CognigySecret, qu
 	// check if necessary arguments are present
 	if (!args.specificContent) return Promise.reject("No payload provided.");
 
+
+	// get access token
+	// add queue entry (into toto queue)
+	// - put into TODO QUEUE
+	// - add a RESULT ID
+	// wait for result in result queue
+	// - fetch result queue and find one with RESULT ID
+	// - timeout via args.timeout
+	// write result to context
+
 	// Always return a Promise
 	// A resolved Promise MUST return the input object
 	// A rejected Promise will stop Flow execution and show an error in the UI, but not the channel
