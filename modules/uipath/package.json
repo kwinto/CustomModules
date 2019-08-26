@@ -2,10 +2,10 @@
 	"name": "UIPath",
 	"version": "1.0.0",
 	"description": "Allows Cognigy.AI to integrate with UIPath",
-	"main": "build/module.js",
+	"main": "src/module.js",
 	"scripts": {
-		"test": "node test/test.js",
-		"build": "tsc -p ."
+		"build": "custom-module build",
+		"deploy": "custom-module deploy"
 	},
 	"repository": {
 		"type": "git",
@@ -14,11 +14,13 @@
 	"author": "Cognigy GmbH",
 	"license": "MIT",
 	"devDependencies": {
+		"@toasta/custom-module-scripts": "^1.1.0",
 		"@types/node": "^10.12.5",
 		"typescript": "^3.1.6"
 	},
 	"dependencies": {
 		"request": "^2.88.0",
-		"request-promise": "^4.2.4"
+		"request-promise-native": "^1.0.7",
+		"uuid": "^3.3.3"
 	}
 }
