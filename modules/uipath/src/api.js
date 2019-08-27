@@ -28,9 +28,8 @@ module.exports.addQueueItem = (queueItem, {
     json: true
 });
 
-module.exports.getReturnQueueItem = ({
-    queueDefinitionId,
-    resultId
+module.exports.getQueueItem = ({
+    filter
 }, {
     account_logical_name,
     service_instance_logical_name,
@@ -46,7 +45,8 @@ module.exports.getReturnQueueItem = ({
         'bearer': access_token
     },
     qs: {
-        '$filter': `QueueDefinitionId eq ${queueDefinitionId} and SpecificContent/ResultId eq ${resultId}`,
+        // '$filter': `QueueDefinitionId eq ${queueDefinitionId} and SpecificContent/ResultId eq ${resultId}`,
+        '$filter': filter,
         '$top': '1'
     },
     json: true

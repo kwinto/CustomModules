@@ -1,7 +1,7 @@
 const request = require('request-promise-native');
 const uuid = require('uuid');
 
-const { getToken, addQueueItem, getReturnQueueItem } = require('./api');
+const { getToken, addQueueItem, getQueueItem } = require('./api');
 
 /**
  * Describes the function
@@ -26,21 +26,11 @@ async function AddQueueItem(input, args) {
 		// check if necessary arguments are present
 		if (!args.specificContent) return Promise.reject("No payload provided.");
 
-
-
-
-
-		// get access token
 		const tokenResult = await getToken({
 			client_id: args.secret.client_id,
 			refresh_token: args.secret.refresh_token
 		});
-		input.context.getFullContext()['tokenResult'] = tokenResult;
 
-
-		// add queue entry (into toto queue)
-		// - put into TODO QUEUE
-		// - add a RESULT ID
 		const resultId = uuid.v4();
 
 		const queueItem = {
@@ -54,43 +44,15 @@ async function AddQueueItem(input, args) {
 				}
 			}
 		};
-		input.context.getFullContext()['queueItem'] = queueItem;
 
 		const addQueueItemResponse = await addQueueItem(queueItem, {
 			access_token: tokenResult.access_token,
 			account_logical_name: args.secret.account_logical_name,
 			service_instance_logical_name: args.secret.service_instance_logical_name
 		});
-		input.context.getFullContext()['addQueueItemResponse'] = addQueueItemResponse;
 
+		input.context.getFullContext()[args.store] = addQueueItemResponse;
 
-		// wait for result in result queue
-		// - fetch result queue and find one with RESULT ID
-		// - timeout via args.timeout
-
-		// const returnQueueItem = await (async () => {
-		// 	for (let polls = 0; polls < 10; polls++) {
-		// 		try {
-		// 			return await getReturnQueueItem({
-		// 				queueDefinitionId: args.resultQueueId,
-		// 				resultId
-		// 			}, {
-		// 					access_token: tokenResult.access_token,
-		// 					account_logical_name: args.secret.account_logical_name,
-		// 					service_instance_logical_name: args.secret.service_instance_logical_name
-		// 				});
-		// 		} catch (error) {
-		// 			console.log('Could not find item in return queue.')
-		// 		}
-
-		// 		await new Promise(r => setTimeout(r, 1000));
-		// 	}
-
-		// 	throw new Error('maximum polling retries reached!');
-		// })();
-
-		// input.context.getFullContext()[args.store] = returnQueueItem;
-		input.context.getFullContext()['returnQueueItem'] = returnQueueItem;
 		return input;
 	} catch (error) {
 		if (args.stopOnError)
@@ -103,6 +65,63 @@ async function AddQueueItem(input, args) {
 
 // You have to export the function, otherwise it is not available
 module.exports.AddQueueItem = AddQueueItem;
+
+/**
+ * Polls for a queue item by OData filter
+ * @arg {SecretSelect} `secret` The configured secret to use
+ * @arg {CognigyScript} `filter` The filter string
+ * @arg {CognigyScript} `store` Where to store the result
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function GetQueueItem(input, args) {
+	try {
+		if (!args.secret) 
+			throw new Error('No secret defined');
+
+		if (!args.filter)
+			throw new Error('No filter defined');
+
+
+		const tokenResult = await getToken({
+			client_id: args.secret.client_id,
+			refresh_token: args.secret.refresh_token
+		});
+
+
+		const queueItem = await (async () => {
+			for (let polls = 0; polls < 15; polls++) {
+				try {
+					return await getQueueItem({
+						filter: args.filter
+					}, 
+					{
+						access_token: tokenResult.access_token,
+						account_logical_name: args.secret.account_logical_name,
+						service_instance_logical_name: args.secret.service_instance_logical_name
+					});
+				} catch (error) {
+					console.log('Could not find item in return queue.')
+				}
+
+				await new Promise(r => setTimeout(r, 1000));
+			}
+
+			throw new Error('maximum polling retries reached!');
+		})();
+
+		input.context.getFullContext()[args.store] = queueItem;
+		return input;
+	} catch (error) {
+		if (args.stopOnError)
+			throw error;
+
+		input.context.getFullContext()[args.store] = error.message;
+		return input;
+	}
+}
+
+module.exports.GetQueueItem = GetQueueItem;
+
 
 /**
  * Describes the function
