@@ -306,9 +306,10 @@ module.exports.addContact = addContact;
  * Get all Sharepoint lists.
  * @arg {CognigyScript} `accessToken` The text to analyse
  * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {CognigyScript} `siteId` Optional
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
-async function getSharepointLists(input: IFlowInput, args: { accessToken: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function getSharepointLists(input: IFlowInput, args: { accessToken: string, contextStore: string, siteId: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
     // Check parameters
     const { accessToken, contextStore, stopOnError } = args;
     if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
@@ -317,8 +318,13 @@ async function getSharepointLists(input: IFlowInput, args: { accessToken: string
 
     try {
         const client: Client = getAuthenticatedClient(accessToken);
-
-        const user = await client.api('sites/root/lists').get();
+        
+        if(siteId.length > 0) {
+            const user = await client.api(`sites/${siteId}/lists`).get();
+        } else {
+            const user = await client.api('sites/root/lists').get();
+        }
+     
 
         input.actions.addToContext(contextStore, user, 'simple');
     } catch (error) {
@@ -333,6 +339,41 @@ async function getSharepointLists(input: IFlowInput, args: { accessToken: string
 }
 
 module.exports.getSharepointLists = getSharepointLists;
+
+/**
+ * Get all Sharepoint lists.
+ * @arg {CognigyScript} `accessToken` The text to analyse
+ * @arg {CognigyScript} `contextStore` Where to store the result
+ * @arg {CognigyScript} `listId` The ID of the Sharepoint list
+ * @arg {Boolean} `stopOnError` Whether to stop on error or continue
+ */
+async function getSharepointListItems(input: IFlowInput, args: { accessToken: string, listId: string, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+    // Check parameters
+    const { accessToken, contextStore, stopOnError, listId } = args;
+    if (!accessToken) return Promise.reject("No access token defined. Please use the Azure Custom Module for authenticating the user.");
+    if (!contextStore) return Promise.reject("No context store key defined.");
+    if (!listId) return Promise.reject("No listId provided.");
+    if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+    try {
+        const client: Client = getAuthenticatedClient(accessToken);
+
+        const listItems = await client.api(`sites/root/lists/${listId}/items`).get();
+
+        input.actions.addToContext(contextStore, listItems, 'simple');
+    } catch (error) {
+        if (stopOnError) {
+            throw new Error(error.message);
+        } else {
+            input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+        }
+    }
+
+    return input;
+}
+
+module.exports.getSharepointListItems = getSharepointListItems;
+
 
 
 function getAuthenticatedClient(accessToken: string): Client {
