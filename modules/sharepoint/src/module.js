@@ -58,18 +58,25 @@ module.exports.getSharepointSiteInfo = getSharepointSiteInfo;
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `url` The API request url
  * @arg {CognigyScript} `list` The sharepoint list
+ * @arg {CognigyScript} `filter` You can add a filter, e.g. '?$select=Title'
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
 async function getSharepointListItems(input, args) {
 
   /* validate node arguments */
-  const { secret, url, list, contextStore, stopOnError } = args;
+  const { secret, url, list, filter, contextStore, stopOnError } = args;
   if (!secret) throw new Error("Secret not defined.");
   if (!url) throw new Error("The request url is not defined.");
   if (!list) throw new Error("The sharepoint list is not defined.");
   if (!contextStore) throw new Error("Context store not defined.");
   if (stopOnError === undefined) throw new Error("Stop on error flag not defined.");
+
+  if (filter.length !== 0) {
+    if (!filter.includes('?')) {
+      throw new Error("You have to insert an '?' at the beginning of your filter.")
+    }
+  }
 
   /* validate secrets */
   const { username, password } = secret;
@@ -87,7 +94,7 @@ async function getSharepointListItems(input, args) {
     headers['Accept'] = 'application/json;odata=verbose';
 
     const response = await request.get({
-      url: `${url}/_api/lists/getbytitle('${list}')/items`,
+      url: `${url}/_api/lists/getbytitle('${list}')/items/${filter}`,
       headers: headers,
       json: true
     });
