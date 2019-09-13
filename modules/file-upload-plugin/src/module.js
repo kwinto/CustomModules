@@ -48,11 +48,9 @@ async function uploadToAWSBucket(cognigy, {
     cognigy.actions.output('', {
         _plugin: {
             type: 'file-upload',
-            payload: {
-                service: 'aws-s3',
-                uploadUrl,
-                downloadUrl
-            }
+            service: 'amazon-s3',
+            uploadUrl,
+            downloadUrl
         }
     });
 
