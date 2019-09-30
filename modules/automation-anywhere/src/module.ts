@@ -105,7 +105,7 @@ async function listDevices(input: any, args: { secret: CognigySecret, contextSto
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, false, url, username, password,'', [], contextStore, stopOnError);
+    const options = await authenticate(input, false, url, username, password, '', [], contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/devices/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
