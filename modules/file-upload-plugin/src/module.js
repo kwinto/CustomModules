@@ -61,10 +61,10 @@ async function uploadToAWSBucket(cognigy, {
 
 /**
  * Prompts a webchat user to upload something to a Azure blob container
- * @arg {String} `accountStorageName` The name of the Azure Storage account that will be use to upload the file
- * @arg {CognigyScript} `containerName` The name of the container, if the name is not given, a random generated id will be used as name
- * @arg {SecretSelect} `secret` The secret with an Azure user's access key. Please name it  "secret_access_key"
- * @arg {Number} `Timeout` The time in minutes that the upload Url used by the Webchat will be availabe, maximum 60 min. ( default 5 min. )
+ * @arg {String} `accountStorageName` The name of the Azure Storage account that will be use to upload the file.
+ * @arg {CognigyScript} `containerName` The name of the container, if the name is not given, a random generated id will be used as name. Only lowercase and numbers are accepted.
+ * @arg {SecretSelect} `secret` The secret access key from  an Azure user's account. Please name the "key" value of the secret "secret_access_key".
+ * @arg {Number} `Timeout` The time in minutes that the upload Url used by the Webchat will be availabe, maximum 60 min. ( default 5 min. ).
  */
 async function uploadToAzureContainer(cognigy, {
     secret,
