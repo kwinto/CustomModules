@@ -61,14 +61,16 @@ async function uploadToAWSBucket(cognigy, {
 
 /**
  * Prompts a webchat user to upload something to a Azure blob container
- * @arg {String} `accountStorageName` the name of the Azure Storage account that will be use to upload the file
- * @arg {CognigyScript} `containerName` the name of the container, if the name is not given then use a random name ()
- * @arg {SecretSelect} `secret` a secret with an Azure user's secret_access_key
+ * @arg {String} `accountStorageName` The name of the Azure Storage account that will be use to upload the file
+ * @arg {CognigyScript} `containerName` The name of the container, if the name is not given, a random generated id will be used as name
+ * @arg {SecretSelect} `secret` The secret with an Azure user's access key. Please name it  "secret_access_key"
+ * @arg {Number} `Timeout` The time in minutes that the upload Url used by the Webchat will be availabe, maximum 60 min. ( default 5 min. )
  */
 async function uploadToAzureContainer(cognigy, {
     secret,
     accountStorageName,
-    containerName
+    containerName,
+    Timeout
 }) {
 
 
@@ -85,10 +87,8 @@ async function uploadToAzureContainer(cognigy, {
     
     const uuidv1 = require('uuid/v1');
 
-    const randomName = uuidv1();
-
     if (!containerName) {
-        containerName = randomName;
+        containerName = uuidv1();
     }
 
     const { secret_access_key } = secret;
@@ -126,11 +126,13 @@ async function uploadToAzureContainer(cognigy, {
 
     /**SasURL Expiration time */
 
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - 5);
+    const start = new Date();
 
-    const tmr = new Date();
-    tmr.setDate(tmr.getDate() + 1);
+    const end = new Date();
+
+    if( Timeout && Timeout <= 60 ) {
+        end.setMinutes(end.getMinutes() + Timeout);
+    }
 
     // By default, credential is always the last element of pipeline factories
     const factories = serviceURL.pipeline.factories;
@@ -141,8 +143,8 @@ async function uploadToAzureContainer(cognigy, {
   const containerSAS = generateBlobSASQueryParameters({
     containerName, // Required
     permissions: ContainerSASPermissions.parse("racwdl").toString(), // Required
-    startTime: new Date(), // Required
-    expiryTime: tmr, // Optional. Date type
+    startTime: start, // Required
+    expiryTime: end, // Optional. Date type
     ipRange: { start: "0.0.0.0", end: "255.255.255.255" }, // Optional
     protocol: SASProtocol.HTTPSandHTTP, // Optional
     version: "2016-05-31" // Optional
