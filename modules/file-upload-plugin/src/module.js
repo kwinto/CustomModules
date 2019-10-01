@@ -74,11 +74,9 @@ async function uploadToAzureContainer(cognigy, {
 
     const {
         Aborter,
-        AccountSASPermissions,
-        AccountSASResourceTypes,
-        AccountSASServices,
+        generateBlobSASQueryParameters,
         SASProtocol,
-        generateAccountSASQueryParameters,
+        ContainerSASPermissions,
         ServiceURL,
         SharedKeyCredential,
         StorageURL,
@@ -138,24 +136,22 @@ async function uploadToAzureContainer(cognigy, {
     const factories = serviceURL.pipeline.factories;
     const sharedKeyCredential = factories[factories.length - 1];
 
-    /**Create a sasToken */
+  /**Create a sasToken */
 
-    const sasToken = generateAccountSASQueryParameters(
-        {
-            expiryTime: tmr,
-            ipRange: { start: '0.0.0.0', end: '255.255.255.255' },
-            permissions: AccountSASPermissions.parse('rwdlacup').toString(),
-            protocol: SASProtocol.HTTPSandHTTP,
-            resourceTypes: AccountSASResourceTypes.parse('sco').toString(),
-            services: AccountSASServices.parse('b').toString(),
-            startTime: now,
-            version: '2019-02-02',
-        },
-        sharedKeyCredential
-    ).toString();
+  const containerSAS = generateBlobSASQueryParameters({
+    containerName, // Required
+    permissions: ContainerSASPermissions.parse("racwdl").toString(), // Required
+    startTime: new Date(), // Required
+    expiryTime: tmr, // Optional. Date type
+    ipRange: { start: "0.0.0.0", end: "255.255.255.255" }, // Optional
+    protocol: SASProtocol.HTTPSandHTTP, // Optional
+    version: "2016-05-31" // Optional
+     },
+     sharedKeyCredential
+   ).toString();
 
     const baseURL = serviceURL.url;
-    const sasSignature = `?${sasToken}`
+    const sasSignature = `?${containerSAS}`
 
     cognigy.actions.output('', {
         _plugin: {
