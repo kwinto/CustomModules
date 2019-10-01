@@ -130,10 +130,14 @@ async function uploadToAzureContainer(cognigy, {
 
     const end = new Date();
 
+    let timeOut = 5;
+
     if( Timeout && Timeout <= 60 ) {
-        end.setMinutes(end.getMinutes() + Timeout);
+        timeOut = Timeout;
     }
 
+    end.setMinutes(end.getMinutes() + timeOut);
+    
     // By default, credential is always the last element of pipeline factories
     const factories = serviceURL.pipeline.factories;
     const sharedKeyCredential = factories[factories.length - 1];
