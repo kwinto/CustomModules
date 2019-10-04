@@ -7,7 +7,7 @@
     "build": "zip ms-sharepoint.zip src/* package.json package-lock.json README.md icon.png icon-large.png"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@toasta/custom-module-scripts": "^1.1.0"
   },
