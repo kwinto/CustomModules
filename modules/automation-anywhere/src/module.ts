@@ -5,28 +5,35 @@ import axios from 'axios';
  * Deployment Node that takes a file id for a bot, and deploys it on one or more devices via device ids.
  * @arg {SecretSelect} `secret` The configured secret to use
  * @arg {CognigyScript} `fileId` The file id for a bot
- * @arg {CognigyScript} `deviceIds` The ids of the devices where you want to deploy the bot
+ * @arg {CognigyScriptArray} `deviceIds` The ids of the devices where you want to deploy the bot
+ * @arg {JSON} `botVariables` The variables your AA bot uses
  * @arg {CognigyScript} `contextStore` Where to store the result
  * @arg {Boolean} `stopOnError` Whether to stop on error or continue
  */
 
-async function deployAutomation(input: any, args: { secret: CognigySecret, fileId: string, deviceIds: string[], contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
+async function deployAutomation(input: any, args: { secret: CognigySecret, fileId: string, deviceIds: string[], botVariables: object, contextStore: string, stopOnError: boolean }): Promise<IFlowInput | {}> {
 
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
-  const { fileId, deviceIds } = args;
+  const { fileId, deviceIds, botVariables } = args;
   if (!fileId) throw new Error('No file id defined.');
   if (!deviceIds) throw new Error('No device ids defined.');
 
   try {
-    const options = await authenticate(input, true, url, username, password, fileId, deviceIds, contextStore, stopOnError);
-    const response = await axios.post(`${url}/v2/automations/deploy`, {}, options);
+    const options  = await authenticate(input, true, url, username, password, fileId, deviceIds, botVariables, contextStore, stopOnError);
+
+    const response = await axios({
+      method: 'post',
+      url: `${url}/v2/automations/deploy`,
+      headers: { 'X-Authorization': options['headers']['X-Authorization'] },
+      data: options['body']
+    });
 
     input.actions.addToContext(contextStore, response.data, 'simple');
   } catch (error) {
     if (stopOnError) {
       throw new Error(error.message);
     } else {
-      input.actions.addToContext(contextStore, { error: error.message }, 'simple');
+      input.actions.addToContext(contextStore, { error: error.message}, 'simple');
     }
   }
 
@@ -47,7 +54,7 @@ async function listAutomations(input: any, args: { secret: CognigySecret, contex
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, false, url, username, password, '', [], contextStore, stopOnError);
+    const options = await authenticate(input, false, url, username, password, '', [], {}, contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/repository/file/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
@@ -76,7 +83,7 @@ async function listBotExecutions(input: any, args: { secret: CognigySecret, cont
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, false, url, username, password, '', [], contextStore, stopOnError);
+    const options = await authenticate(input, false, url, username, password, '', [], {}, contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/activity/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
@@ -105,7 +112,7 @@ async function listDevices(input: any, args: { secret: CognigySecret, contextSto
   const { contextStore, stopOnError, username, password, url } = validateArgs(args);
 
   try {
-    const options = await authenticate(input, false, url, username, password, '', [], contextStore, stopOnError);
+    const options = await authenticate(input, false, url, username, password, '', [], {}, contextStore, stopOnError);
     const response = await axios.post(`${url}/v2/devices/list`, {}, options);
 
     input.actions.addToContext(contextStore, response.data, 'simple');
@@ -122,7 +129,7 @@ async function listDevices(input: any, args: { secret: CognigySecret, contextSto
 module.exports.listDevices = listDevices;
 
 
-async function authenticate(input: any, deploy: boolean, url: string, username: string, password: string, fileId: string, deviceIds: string[], contextStore: string, stopOnError: boolean): Promise<object> {
+async function authenticate(input: any, deploy: boolean, url: string, username: string, password: string, fileId: string, deviceIds: string[], botVariables: object, contextStore: string, stopOnError: boolean): Promise<object> {
 
   let options = {};
   const payload = {
@@ -142,7 +149,8 @@ async function authenticate(input: any, deploy: boolean, url: string, username: 
         body: {
           fileId,
           deviceIds,
-          runWithRdp: false
+          runWithRdp: false,
+          botVariables
         }
       };
     } else {
