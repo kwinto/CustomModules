@@ -24,6 +24,35 @@ Deployment API that takes a file id for a bot and deploys it on one or more devi
   "automationId": "33"
 }
 ```
+
+If you want to use Bot Variables the structure has to look like the following: 
+
+```json
+{
+    "variable1": {
+      "string": "value"
+    },
+    "variable2": {
+      "list": [
+        "value1",
+        "value2"
+      ]
+    },
+    "variable3": {
+      "array": [
+        [
+          "value11",
+          "value12"
+        ],
+        [
+          "value21",
+          "value22"
+        ]
+      ]
+    }
+}
+```
+
 To run your Automation Anywhere robot you have to choose a user with admin rights. Furthermore, you can't be logged in with the same user account on your device (where the robot is started) and inside Cognigy to execute the node via your Cognigy Secret.
 
 ### List Automations
