@@ -4,9 +4,9 @@ This Custom Module provides a bunch of different methods to manipulate the Congi
 
 ## Node: Change Bot Avatar
 
-Takes a public **direct URL** to the new bot avatar image. If everything went well, it will return the following:
-```json
-{
-  "changedAvatar": "Avatar was changed succesfully to https://link-to-image.jpg"
-}
-```
+Takes a public **direct URL** to the new bot avatar image and changed the avatar in the webchat. 
+
+
+## Node: Reset Bot Avatar
+
+This node resets the changed bot avatar image. Use this, if you want to use the default avatar image again after changing it with **Change Bot Avatar**.
