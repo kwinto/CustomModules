@@ -19,7 +19,7 @@ async function sendEmailWithAttachment(input: any, args: {
     fromName: string,
     fromEmail: string,
     to: string,
-    subject: object,
+    subject: string,
     message: string
     attachmentName?: string,
     attachmentUrl?: string,
@@ -27,19 +27,21 @@ async function sendEmailWithAttachment(input: any, args: {
     stopOnError: boolean
 }): Promise<IFlowInput | {}> {
 
+    if (!args.secret) throw new Error('No secret defined. You need the secret to proivde the email configuration information.');
 
-    const { secret, fromName, fromEmail, to, subject, message, attachmentName, attachmentUrl, contextStore, stopOnError } = args;
+    let { secret, fromName, fromEmail, to, subject, message, attachmentName, attachmentUrl, contextStore, stopOnError } = args;
     const { host, port, secure, user, password } = secret;
 
     // checking arguments
-    if (!secret) throw new Error('No secret defined. You need the secret to proivde the email configuration information.');
     if (!fromName) throw new Error('No `from` name defined. This could be the name of your company or your employee, for example.');
     if (!fromEmail) throw new Error('No `from` email address defined.');
     if (!to) throw new Error('No `to` email address defined. You can provide a list of email addresses by just adding them like this: test@test.de, mail@mail.de, ...');
+    if (!subject) subject = "";
+    if (!message) message = "";
 
     // check the attachment argument information
-    if (attachmentName && !attachmentUrl) throw new Error('You have to define botch attachment information. You forgot to define the attachment URL');
-    if (!attachmentName && attachmentUrl) throw new Error('You have to define botch attachment information. You forgot to define the attachment name');
+    if (attachmentName && !attachmentUrl) throw new Error('You have to define both attachment information. You forgot to define the attachment URL');
+    if (!attachmentName && attachmentUrl) throw new Error('You have to define both attachment information. You forgot to define the attachment name');
 
     if (!contextStore) throw new Error('No context store name defined.');
 
