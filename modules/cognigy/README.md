@@ -18,7 +18,7 @@ You need to create a Cognigy Secret. Name is for example 'Email Secret' or somet
         - key: **security**
         - value: `TLS`, `STARTTLS` or `NONE`
     - Email Username:
-     - key: **username**
+     - key: **user**
      - value: *The username of your Email account*
     - Email Password:
         - key: **password**

@@ -60,7 +60,7 @@ async function sendEmailWithAttachment(input: any, args: {
     if (!fromMailValidation) throw new Error(`The email ${fromEmail} is not valid. Please check it.`);
 
     for (let em of to.split(',')) {
-        let toMailValidation = validateEmail(em);
+        let toMailValidation = validateEmail(em.trim());
         if (!toMailValidation) throw new Error(`The email ${em} is not valid. Please check it.`);
     }
 
