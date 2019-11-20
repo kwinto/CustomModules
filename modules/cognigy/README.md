@@ -14,9 +14,9 @@ You need to create a Cognigy Secret. Name is for example 'Email Secret' or somet
     - Email Server Port:
         - key: **port**
         - value: The port of your email server; 465 or 587
-    - Email Server Secure Option:
-        - key: **secure**
-        - value: `true` or `false`
+    - Email Server Security Option:
+        - key: **security**
+        - value: `TLS`, `STARTTLS` or `NONE`
     - Email Username:
      - key: **username**
      - value: *The username of your Email account*

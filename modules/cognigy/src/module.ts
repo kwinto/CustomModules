@@ -30,7 +30,7 @@ async function sendEmailWithAttachment(input: any, args: {
     if (!args.secret) throw new Error('No secret defined. You need the secret to proivde the email configuration information.');
 
     let { secret, fromName, fromEmail, to, subject, message, attachmentName, attachmentUrl, contextStore, stopOnError } = args;
-    const { host, port, secure, user, password } = secret;
+    const { host, port, security, user, password } = secret;
 
     // checking arguments
     if (!fromName) throw new Error('No `from` name defined. This could be the name of your company or your employee, for example.');
@@ -48,7 +48,10 @@ async function sendEmailWithAttachment(input: any, args: {
     // checking secret information
     if (!host) throw new Error('No email host defined. This could be something like smtp.example.com.');
     if (!port) throw new Error('No email port defined. This could be something like 587 or 465.');
-    if (!secure) throw new Error('No email secure option defined. This could be true or false.');
+    if (!security) throw new Error('No email security option defined. This could be TLS, STARTTLS or NONE.');
+    if (!['TLS', 'STARTTLS', 'NONE'].includes(security.trim().toUpperCase())) {
+        throw new Error('Invalid email security option defined. This could be TLS, STARTTLS or NONE.');
+    }
     if (!user) throw new Error('No email user defined. This is your email username.');
     if (!password) throw new Error('No email password defined. This is your email password.');
 
@@ -62,12 +65,12 @@ async function sendEmailWithAttachment(input: any, args: {
     }
 
     try {
-
         // create reusable transporter object using the default SMTP transport
         const transporter = nodemailer.createTransport({
             host,
             port,
-            secure: secure === 'true',
+            secure: security === 'TLS',
+            ignoreTLS: security === 'NONE',
             auth: {
                 user,
                 pass: password
